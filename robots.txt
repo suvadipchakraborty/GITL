@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://indian-traffic-premier-league.pages.dev/sitemap.xml
+Sitemap: https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/sitemap.xml

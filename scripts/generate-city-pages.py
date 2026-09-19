@@ -26,9 +26,9 @@ CITY_DIR = os.path.join(ROOT, "city")
 # Replace this with your real deployed domain before going live — it's
 # used in canonical links and absolute og:image URLs, both of which
 # WhatsApp/Slack/Google require to be full absolute URLs, not relative
-# paths. Search this whole project for indian-traffic-premier-league.pages.dev to find every
+# paths. Search this whole project for indian-traffic-premier-league.suvadipchakraborty.workers.dev to find every
 # spot that needs it (index.html has it too).
-SITE_URL = "indian-traffic-premier-league.pages.dev"
+SITE_URL = "indian-traffic-premier-league.suvadipchakraborty.workers.dev"
 
 DIR_NAMES = {
     "N": "North", "S": "South", "E": "East", "W": "West",
