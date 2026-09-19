@@ -114,6 +114,24 @@ const ITPL = (() => {
     return { m, days, live };
   }
 
+  /* Head-to-head over a past window, matched by calendar day (not array index) so
+     two cities with slightly different gaps in their history still pair correctly.
+     fromDaysAgo/toDaysAgo are inclusive, e.g. (7,13) = "week -1". Returns null when
+     neither city has a shared reading in that window (30-day history hasn't built up yet). */
+  function h2hWindow(ptsA, ptsB, fromDaysAgo, toDaysAgo) {
+    const now = Date.now(), keyOf = t => new Date(t).toDateString();
+    const mapA = {}, mapB = {};
+    (ptsA || []).forEach(p => { mapA[keyOf(p.t)] = p; });
+    (ptsB || []).forEach(p => { mapB[keyOf(p.t)] = p; });
+    const rows = Object.keys(mapA).filter(k => mapB[k]).map(k => ({ a:mapA[k], b:mapB[k] }))
+      .filter(({ a }) => { const d = Math.floor((now - new Date(a.t).getTime()) / 864e5); return d >= fromDaysAgo && d <= toDaysAgo; })
+      .sort((x, y) => new Date(x.a.t) - new Date(y.a.t));
+    if (!rows.length) return null;
+    let wa = 0, wb = 0;
+    rows.forEach(({ a, b }) => { if (a.index > b.index) wa++; else if (b.index > a.index) wb++; });
+    return { wa, wb, n:rows.length, from:rows[0].a.t, to:rows[rows.length - 1].a.t };
+  }
+
   /* ---- league maths ---- */
   function table(raw, wk, mode, mo) {                   // MOST congested first: gridlock wins the league
     const src = mode === "season" ? (wk && wk.m) : mode === "month" ? mo : null;
@@ -152,5 +170,5 @@ const ITPL = (() => {
     return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Traffic index chart">${grid}${pad}${off > 0 ? `<text class="al" x="${L}" y="${H - 4}" text-anchor="start">${N} days ago</text>` : ""}<text class="al" x="${L - 3}" y="${y(mx) + 3}" text-anchor="end">${mx.toFixed(1)}</text><text class="al" x="${L - 3}" y="${y(mn) + 3}" text-anchor="end">${mn.toFixed(1)}</text>${body}${lab}</svg>`;
   }
 
-  return { API_URL, BASE, BUCKETS, SHORT, WIN, RANGE, AMPM, PARTS, month, COL, DERBIES, level, r2, ord, abbr, dayName, dateName, hist30, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
+  return { API_URL, BASE, BUCKETS, SHORT, WIN, RANGE, AMPM, PARTS, month, COL, DERBIES, level, r2, ord, abbr, dayName, dateName, hist30, h2hWindow, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
 })();

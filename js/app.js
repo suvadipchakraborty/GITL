@@ -3,7 +3,7 @@
    League table · form guide · derby centre · mobile heatmap.
    API URL + shared logic live in js/itpl.js.
    ========================================================= */
-const S = { raw:null, wk:null, ht:null, mo:null, forms:{}, hist:{}, mode:"live", derbyReady:false };
+const S = { raw:null, wk:null, ht:null, mo:null, forms:{}, hist:{}, hist30:{}, mode:"live", derbyReady:false, pdReq:0 };
 const $ = id => document.getElementById(id);
 const cityById = id => S.raw.cities.find(c => c.id === id);
 
@@ -141,7 +141,45 @@ function renderDerby(title) {
       <a href="city/${B.id}/index.html" class="side">${ITPL.crest(B)}<b>${B.name}${tw === "b" ? " 🏆" : ""}</b><i class="go">Club report ›</i></a>
     </div>
     <div class="verdict">${verdict}</div>
-    ${rows}${h2h}${chart}`;
+    ${rows}${h2h}${chart}
+    <div class="pd-wrap" id="derbyPast"><div class="chart-loading">Loading past derbies…</div></div>`;
+  loadPastDerbies(A, B);
+}
+
+/* Past derbies: week -1/-2/-3 results between the same two cities, pulled from
+   each city's 30-day history. Only stats-free scorelines are shown here — the
+   full stat breakdown above is for the current fixture only. Weeks with no
+   shared data yet (30-day history is still building) are simply left out. */
+async function getHist30(c) {
+  if (!S.hist30[c.id]) S.hist30[c.id] = ITPL.hist30(c);
+  return S.hist30[c.id];
+}
+async function loadPastDerbies(A, B) {
+  const token = ++S.pdReq;
+  if (!$("derbyPast")) return;
+  const [ha, hb] = await Promise.all([getHist30(A), getHist30(B)]);
+  if (token !== S.pdReq) return;                      // a newer derby selection superseded this fetch
+  const el = $("derbyPast"); if (!el) return;
+  const weeks = [1, 2, 3]
+    .map(w => { const r = ITPL.h2hWindow(ha.pts, hb.pts, w * 7, w * 7 + 6); return r && { ...r, w }; })
+    .filter(Boolean);
+  if (!weeks.length) {
+    el.innerHTML = `<div class="pd-t">Past derbies</div><div class="chart-loading">History for week -1 to -3 builds in as the sheet accumulates more than 7 days of readings.</div>`;
+    return;
+  }
+  el.innerHTML = `<div class="pd-t">Past derbies</div>` + weeks.map(r => {
+    const aw = r.wa > r.wb, bw = r.wb > r.wa;
+    const verdict = r.wa === r.wb ? "Honours even that week." : `${aw ? A.name : B.name} took that derby.`;
+    return `<div class="pd-week">
+      <div class="derby-name">Week -${r.w} · ${ITPL.dateName(r.from)}–${ITPL.dateName(r.to)}</div>
+      <div class="score">
+        <div class="side">${ITPL.crest(A)}<b>${A.name}${aw ? " 🏆" : ""}</b></div>
+        <div class="ft"><span>${r.wa}</span><i>–</i><span>${r.wb}</span><small>Full time</small></div>
+        <div class="side">${ITPL.crest(B)}<b>${B.name}${bw ? " 🏆" : ""}</b></div>
+      </div>
+      <div class="verdict">${verdict}</div>
+    </div>`;
+  }).join("");
 }
 
 /* ---------- Heatmap: stacked rows, never scrolls sideways ---------- */

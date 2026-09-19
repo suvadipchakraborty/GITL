@@ -100,6 +100,17 @@ h1.headline em { font-style:normal; color:var(--green); }
 .h2h { margin-top:12px; } .h2h-t { font-family:var(--font-display); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:6px; } .h2h-t em { font-style:normal; color:var(--green); margin-left:6px; }
 .pips { display:flex; gap:5px; } .pip { flex:1; text-align:center; font-family:var(--font-mono); font-size:10px; padding:6px 0; border-radius:5px; background:rgba(255,255,255,.1); color:var(--muted); } .pip.pa { background:var(--cyan); color:#00202a; } .pip.pb { background:#ff4d9d; color:#fff; }
 .h2h-k { font-size:10.5px; color:var(--muted); margin-top:5px; }
+.pd-wrap { margin-top:14px; }
+.pd-t { font-family:var(--font-display); font-size:12.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-dim); margin-bottom:2px; }
+.pd-week { padding:10px 0; border-top:1px solid rgba(255,255,255,.08); }
+.pd-week .derby-name { font-size:10px; margin-bottom:6px; }
+.pd-week .score { gap:4px; }
+.pd-week .side { gap:4px; }
+.pd-week .side .crest { width:26px; height:28px; font-size:9px; }
+.pd-week .side b { font-size:11px; }
+.pd-week .ft { font-size:22px; }
+.pd-week .ft small { font-size:8px; }
+.pd-week .verdict { font-size:11px; margin:6px 0 0; }
 
 /* Heatmap — stacked, no sideways scrolling */
 .heatmap-wrap { background:var(--bg-2); border:1px solid var(--line); border-radius:var(--radius); padding:6px 10px 8px; }
