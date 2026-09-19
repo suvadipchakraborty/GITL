@@ -161,3 +161,25 @@ footer { padding:30px 0 14px; text-align:center; color:var(--muted); font-size:1
 @media (min-width:480px) { h1.headline { font-size:44px; } .lt-head, .lt-row { grid-template-columns:22px 16px 32px minmax(0,1fr) 52px 96px; gap:8px; } .fb { width:16px; height:16px; } }
 @media (max-width:360px) { .lt-head, .lt-row { grid-template-columns:18px 12px 28px minmax(0,1fr) 40px 78px; gap:4px; } .fb { width:13px; height:13px; font-size:8px; } .form { gap:2px; } h1.headline { font-size:31px; } .cl-big { font-size:40px; } }
 .brand-row a { display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit; flex:1; min-width:0; }
+
+/* ---- v3.1: gridlock-wins league, clickable cues, day-part heatmap headers, 3 tabs ---- */
+.z-up { border-left-color:var(--cyan); } .zk-up { background:var(--cyan); }
+.posbox.z-up { border-color:var(--cyan); } .posbox.z-up em { color:var(--cyan); }
+.tab { line-height:1.1; padding:6px 2px; } .tab small { display:block; font-family:var(--font-body); font-size:9.5px; letter-spacing:0; text-transform:none; font-weight:500; opacity:.75; margin-top:1px; }
+.tap-hint { display:flex; align-items:center; gap:10px; margin:0 0 10px; padding:9px 12px; border:1px dashed var(--green); border-radius:10px; background:rgba(0,255,133,.07); font-size:12px; color:var(--ink-dim); } .tap-hint b { color:var(--green); }
+.tap-hint .finger { font-size:20px; display:inline-block; animation:tap 1.8s ease-in-out infinite; }
+@keyframes tap { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); } }
+@keyframes nudge { 0%,100% { transform:translateX(0); } 50% { transform:translateX(4px); } }
+.lt-name b::after, .hm-name b::after { content:" ›"; color:var(--green); font-weight:700; display:inline-block; }
+.lt-row:first-child .lt-name b::after { animation:nudge 1.6s ease-in-out infinite; }
+.lt-row:hover .lt-name b, .hm-row:hover .hm-name b { text-decoration:underline; text-decoration-color:var(--green); text-underline-offset:3px; }
+.lt-row:active, .hm-row:active { background:rgba(0,255,133,.12); }
+.hm-row { border-radius:6px; } .hm-row:hover { background:rgba(255,255,255,.05); }
+.side .go { font-style:normal; font-size:10.5px; color:var(--green); border:1px solid var(--green); border-radius:999px; padding:1px 8px; }
+.hm-legend { padding:2px 0 6px; } .hm-legend + .hm-row { border-top:1px solid var(--line); } .hm-row + .hm-legend { border-top:1px solid var(--line); margin-top:4px; padding-top:8px; }
+.hm-parts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:3px; margin-bottom:4px; }
+.hm-parts span { text-align:center; font-family:var(--font-display); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:rgba(255,255,255,.1); border-radius:6px; padding:4px 0 3px; line-height:1.15; }
+.hm-parts em { font-style:normal; margin-right:3px; } .hm-parts small { display:block; font-family:var(--font-mono); font-size:8.5px; letter-spacing:0; text-transform:none; color:var(--muted); }
+.hm-ranges i { font-style:normal; text-align:center; font-family:var(--font-mono); font-size:9.5px; line-height:1.15; color:var(--ink-dim); } .hm-ranges small { display:block; font-size:8.5px; color:var(--muted); }
+.rb small { line-height:1.15; font-size:9px; }
+@media (max-width:360px) { .tab { font-size:12px; } .tap-hint { font-size:11.5px; } }

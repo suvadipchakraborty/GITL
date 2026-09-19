@@ -9,7 +9,11 @@ const ITPL = (() => {
   const BASE = window.ITPL_BASE || "";           // "" on home, "../../" on city pages
   const FALLBACK_URL = BASE + "data/sample-cities.json";
   const BUCKETS = ["6-8 AM","8-10 AM","10-12 PM","12-4 PM","4-6 PM","6-8 PM","8-10 PM","10-12 AM"]; // must match Code.gs
-  const SHORT = ["6a","8a","10a","12p","4p","6p","8p","10p"];
+  const SHORT = ["6–8a","8–10a","10a–12","12–4p","4–6p","6–8p","8–10p","10p–12"];         // compact chart axis labels
+  const WIN   = ["6–8 AM","8–10 AM","10 AM–12 PM","12–4 PM","4–6 PM","6–8 PM","8–10 PM","10 PM–12 AM"]; // full, unambiguous window names
+  const RANGE = ["6–8","8–10","10–12","12–4","4–6","6–8","8–10","10–12"];
+  const AMPM  = ["AM","AM","AM","PM","PM","PM","PM","PM"];
+  const PARTS = [{ e:"🌅", n:"Morning", r:"6–10 AM" }, { e:"☀️", n:"Midday", r:"10 AM–4 PM" }, { e:"🌆", n:"Evening", r:"4–8 PM" }, { e:"🌙", n:"Night", r:"8 PM–12" }];
   const COL = { free:"#00ff85", moderate:"#ffd23f", heavy:"#ff6b6b", severe:"#ff2e63" };
   const ABBR = { "new-delhi":"NDL", mumbai:"MUM", bengaluru:"BLR", chennai:"CHE", kolkata:"KOL", hyderabad:"HYD", pune:"PUN", ahmedabad:"AMD", jaipur:"JAI", lucknow:"LKO" };
   const DERBIES = [
@@ -85,23 +89,39 @@ const ITPL = (() => {
     return { pts, live:false };
   }
 
+  /* Month view: tries range=30d; if the backend only keeps ~8 days (Code.gs default) it uses the 7-day daily points and reports how many days it really has. */
+  async function month(raw) {
+    const m = {}; let days = 0, live = true;
+    await pool(raw.cities.filter(c => c.index != null), 4, async c => {
+      const j = await api(`history=${encodeURIComponent(c.id)}&range=30d`, 30 * 60 * 1000);
+      const span = a => { const t = (a || []).map(p => new Date(p.t).getTime()).filter(x => !isNaN(x)); return t.length ? (Math.max(...t) - Math.min(...t)) / 864e5 : 0; };
+      let pts = j && j.points && span(j.points) >= 8 ? j.points : null;   // ignore backends that don't really return >8 days
+      if (!pts) { const h = await hist(c, "7d"); pts = h.pts; if (!h.live) live = false; }
+      m[c.id] = r2(pts.reduce((s, p) => s + p.index, 0) / pts.length);
+      const t = pts.map(p => new Date(p.t).getTime()).filter(x => !isNaN(x));
+      days = Math.max(days, t.length ? Math.round((Math.max(...t) - Math.min(...t)) / 864e5) + 1 : pts.length);
+    });
+    return { m, days, live };
+  }
+
   /* ---- league maths ---- */
-  function table(raw, wk, mode) {                       // best (lowest min/km) first
-    const rows = raw.cities.filter(c => c.index != null).map(c => ({ c, v: mode === "season" && wk && wk.m[c.id] != null ? wk.m[c.id] : c.index }));
-    rows.sort((a, b) => a.v - b.v); rows.forEach((r, i) => { r.pos = i + 1; }); return rows;
+  function table(raw, wk, mode, mo) {                   // MOST congested first: gridlock wins the league
+    const src = mode === "season" ? (wk && wk.m) : mode === "month" ? mo : null;
+    const rows = raw.cities.filter(c => c.index != null).map(c => ({ c, v: src && src[c.id] != null ? src[c.id] : c.index }));
+    rows.sort((a, b) => b.v - a.v); rows.forEach((r, i) => { r.pos = i + 1; }); return rows;
   }
   const zones = n => ({ up: Math.max(1, Math.round(n * .2)), down: Math.max(1, Math.round(n * .3)) });
   const zoneOf = (pos, n) => { const z = zones(n); return pos <= z.up ? "up" : pos > n - z.down ? "down" : "mid"; };
-  const ZONE_LABEL = { up:"Promotion zone", down:"Relegation zone", mid:"Mid-table" };
+  const ZONE_LABEL = { up:"Champions zone", down:"Relegation zone", mid:"Mid-table" };
 
-  /* Form guide: each day vs the day before. W = calmer (index fell >3%), L = worse (>3%), D = within ±3%. */
+  /* Form guide: each day vs the day before. W = busier (index rose >3%: gridlock gains), L = calmer (fell >3%), D = within ±3%. */
   function form(pts) {
     const v = pts.slice().sort((a, b) => new Date(a.t) - new Date(b.t)).map(p => p.index), out = [];
-    for (let i = 1; i < v.length; i++) { const d = (v[i] - v[i - 1]) / v[i - 1]; out.push(d < -.03 ? "W" : d > .03 ? "L" : "D"); }
+    for (let i = 1; i < v.length; i++) { const d = (v[i] - v[i - 1]) / v[i - 1]; out.push(d > .03 ? "W" : d < -.03 ? "L" : "D"); }
     return out.slice(-5);
   }
   const formPts = f => f.reduce((s, r) => s + (r === "W" ? 3 : r === "D" ? 1 : 0), 0);
-  const TIP = { W:"Win: calmer than the day before", D:"Draw: within 3% of the day before", L:"Loss: busier than the day before" };
+  const TIP = { W:"Win: busier than the day before (gridlock gains)", D:"Draw: within 3% of the day before", L:"Loss: calmer than the day before" };
   const badges = f => f && f.length ? `<span class="form">${f.map(r => `<i class="fb fb-${r}" title="${TIP[r]}">${r}</i>`).join("")}</span>` : `<span class="form form-wait">···</span>`;
   const crest = c => `<span class="crest" style="--c:${COL[level(c.index).key]}">${abbr(c)}</span>`;
 
@@ -121,5 +141,5 @@ const ITPL = (() => {
     return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Traffic index chart">${grid}<text class="al" x="${L - 3}" y="${y(mx) + 3}" text-anchor="end">${mx.toFixed(1)}</text><text class="al" x="${L - 3}" y="${y(mn) + 3}" text-anchor="end">${mn.toFixed(1)}</text>${body}${lab}</svg>`;
   }
 
-  return { API_URL, BASE, BUCKETS, SHORT, COL, DERBIES, level, r2, ord, abbr, dayName, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
+  return { API_URL, BASE, BUCKETS, SHORT, WIN, RANGE, AMPM, PARTS, month, COL, DERBIES, level, r2, ord, abbr, dayName, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
 })();

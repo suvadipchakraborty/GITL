@@ -314,30 +314,40 @@ city pages. Submit `sitemap.xml` to Google Search Console once your
 domain is live — this is usually the fastest way to get new pages crawled
 rather than waiting for Google to discover them organically.
 
-## 9. Matchday redesign (v3)
+## 9. Matchday redesign (v3.1: gridlock wins)
 
-**Theme:** deep-purple floodlit "Matchday Night" look with neon green, cyan and magenta accents (`css/style.css`). Old colour token names are kept as aliases.
+**The league is reversed on purpose:** the site mocks Indian traffic, so **the most congested city wins**. Position 1 (🏆) is the highest min/km. The top 20% are the *Champions zone*; the bottom 30% are the *Relegation zone* (cities that are suspiciously smooth).
 
 **Home page (`index.html` + `js/app.js`)**
-- **League table**: cities ranked by min/km, lowest first. Top 20% = promotion zone (green edge), bottom 30% = relegation zone (pink edge). Tabs switch between *Live* and *Season* (7-day average). ▲▼ shows live position vs the 7-day table.
-- **Form guide**: last 5 days as W/D/L badges. Each day's latest reading is compared with the day before: W = index fell >3%, L = rose >3%, D = within 3%. W = 3 pts, D = 1.
-- **Derby day**: any two cities head to head: seven stats, a scoreline, a 7-day head-to-head strip and an overlaid daily-rhythm chart. Preset rivalries live in `ITPL.DERBIES` (`js/itpl.js`). `index.html?derby=mumbai,pune` deep-links to one.
-- **Heatmap** is now stacked rows (city name on top, 8 time-window cells beneath), so it never scrolls sideways.
-- The old city-card grid, search box and bottom-sheet were removed: every table row, heatmap row and derby crest now opens the city page, which has everything the sheet had and more. `?open=<slug>` still works (redirects to the city page).
+- **League table** with three views: **Live** (this hour), **Season** (7-day average) and **Hall of Fame** (30-day average). ▲▼ shows live position vs the 7-day table.
+- **Tap cues:** a "Tap any city" hint box, a green › after every city name (the top row's arrow nudges), hover underline and a pressed state. Heatmap rows and derby crests carry the same cues.
+- **Form guide:** last 5 days as W/D/L. Each day's latest reading is compared with the day before: **W = index rose >3% (busier, gridlock gains)**, L = fell >3% (calmer), D = within 3%. W = 3 pts, D = 1.
+- **Derby day:** the **more congested city wins** each stat (exception: "fastest corridor", where the slower one wins), with a 🏆 for the winner. Head-to-head over the last 7 days: the busier day wins. Presets live in `ITPL.DERBIES`; `index.html?derby=mumbai,pune` deep-links.
+- **Kick-off times heatmap:** stacked rows (no sideways scroll). Headers now show day-parts (🌅 Morning 6–10 AM, ☀️ Midday 10 AM–4 PM, 🌆 Evening 4–8 PM, 🌙 Night 8 PM–12) plus each window's range with AM/PM, repeated at the bottom. Window names are defined once in `js/itpl.js` (`WIN`, `RANGE`, `AMPM`, `PARTS`).
 
-**City pages (`city/<slug>/`)**: live index with league position and form, extra stat tiles (7-day average, calmest/busiest day, consistency), 24h and 7-day trend charts, "best time to leave" daily-rhythm bars, a tactics-board view of the four corridors (hardest/smoothest flagged), a commute-cost calculator (hours and days lost per year, vs the league leaders), an auto-written match report, and next-fixture links into the derby view.
+**City pages (`city/<slug>/`)**: live index, league position and form, 7-day stat tiles, 24h and 7-day trends, daily-rhythm bars, a tactics-board view of the four corridors (slowest = "top scorer", smoothest = "benchwarmer"), a commute-cost calculator (compared with the league's smoothest city), an auto-written match report and next-fixture links into the derby view.
 
-**Code layout:** `js/itpl.js` is now the single shared library (API URL, bands, caching, table/form maths, charts) used by both `app.js` and `city.js`. **The Apps Script API URL now lives only in `js/itpl.js`**, so update it in one place. `Code.gs` and the API contract are unchanged: everything new is derived from the existing snapshot, `history`, `weekly_ranking` and `heatmap` endpoints.
-
-**Quota note:** the form guide needs one 7-day history call per city. They run 4 at a time and are cached in the browser for 30 minutes (snapshot 5 minutes), so repeat visits cost the backend almost nothing.
+**Code layout:** `js/itpl.js` is the shared library (API URL, bands, caching, table/form maths, charts) used by `app.js` and `city.js`. The Apps Script API URL lives only there. `Code.gs` is unchanged.
 
 **Regenerate city pages** after editing the template: `python3 scripts/generate-city-pages.py`.
 
-## 10. Ideas for later
+## 10. Hall of Fame (30-day) needs a small backend change
 
-- Push/email alerts when a city crosses into "Severe" or drops into the relegation zone.
+The Month view is built and works today, but **`Code.gs` prunes `IndexHistory` to about 8 days and only serves `range=24h` / `7d`**, so there is no real 30-day data to read yet. Until then the Hall of Fame tab averages the daily readings the sheet does have and says so under the tabs ("The sheet only holds N days of readings so far…").
+
+When you're ready (this is the only backend change needed):
+1. In the history pruning step, raise the retention cutoff from ~8 days to ~31 days (about 19 runs × 10 cities × 31 days ≈ 5,900 rows, well within Sheets limits).
+2. In the `?history=<id>&range=` handler, accept `30d` and return one point per day for 30 days, same shape as `7d`: `{ city, range, points: [{t, index}, ...] }`.
+
+The frontend requests `range=30d` per city (only when the Hall of Fame tab is opened, 4 at a time, cached 30 minutes). It only trusts the response if the points span 8+ days, so it upgrades itself automatically once the backend supports it.
+
+**Quota note:** the form guide needs one 7-day history call per city, also run 4 at a time and cached for 30 minutes (snapshot 5 minutes).
+
+## 11. Ideas for later
+
+- Push/email alerts when a city takes the top spot or hits Severe.
 - Shareable derby result cards (needs a serverless image endpoint).
-- More cities: the Cities sheet is data-driven, and the league zones scale automatically.
+- More cities: the Cities sheet is data-driven, and the zones scale automatically.
 
 ---
 Created by Suva

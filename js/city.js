@@ -59,21 +59,21 @@ const COL = ITPL.COL;
   const hv = ht.m[slug], hOk = hv && hv.every(x => x != null);
   let peak = null, calm = null;
   if (hOk) {
-    const mx = Math.max(...hv), mn = Math.min(...hv); peak = ITPL.BUCKETS[hv.indexOf(mx)]; calm = ITPL.BUCKETS[hv.indexOf(mn)];
+    const mx = Math.max(...hv), mn = Math.min(...hv); peak = ITPL.WIN[hv.indexOf(mx)]; calm = ITPL.WIN[hv.indexOf(mn)];
     $("hmNote").textContent = ht.live ? "Live from sheet" : "Demo pattern";
-    $("cRhythm").innerHTML = `<div class="rbars">${hv.map((x, i) => `<div class="rb"><b>${x.toFixed(1)}</b><div class="rb-t"><i style="height:${Math.max(6, x / mx * 100)}%;background:${COL[ITPL.level(x).key]}"></i></div><small>${ITPL.SHORT[i]}</small></div>`).join("")}</div>
-      <div class="rhythm-tips"><span>🟢 Best time to go <b>${calm}</b></span><span>🔴 Avoid <b>${peak}</b></span></div>`;
+    $("cRhythm").innerHTML = `<div class="rbars">${hv.map((x, i) => `<div class="rb"><b>${x.toFixed(1)}</b><div class="rb-t"><i style="height:${Math.max(6, x / mx * 100)}%;background:${COL[ITPL.level(x).key]}"></i></div><small>${ITPL.RANGE[i]}<br>${ITPL.AMPM[i]}</small></div>`).join("")}</div>
+      <div class="rhythm-tips"><span>🟢 Calmest window <b>${calm}</b></span><span>🔴 Peak gridlock <b>${peak}</b></span></div>`;
   } else $("cRhythm").innerHTML = `<div class="chart-loading">Rhythm needs a few more hourly readings.</div>`;
   renderCommute(city, live, hOk ? hv : null, wk.m[slug]);
 
   // Match report
-  const above = live[me.pos - 2], below = live[me.pos];
-  const zTxt = zone === "up" ? " — inside the promotion zone" : zone === "down" ? " — deep in the relegation zone" : "";
-  const say = [`${city.name} sit ${ITPL.ord(me.pos)} of ${n} at ${city.index.toFixed(2)} min/km${zTxt}.`];
-  if (above) say.push(`${above.c.name} are ${(city.index - above.v).toFixed(2)} min/km ahead.`);
-  if (below) say.push(`${below.c.name} sit ${(below.v - city.index).toFixed(2)} behind.`);
+  const above = live[me.pos - 2], below = live[me.pos];   // table is sorted most-gridlocked first
+  const zTxt = zone === "up" ? " — in the champions zone" : zone === "down" ? " — in the relegation zone (suspiciously smooth for India)" : "";
+  const say = [me.pos === 1 ? `${city.name} are the reigning gridlock champions at ${city.index.toFixed(2)} min/km.` : `${city.name} sit ${ITPL.ord(me.pos)} of ${n} at ${city.index.toFixed(2)} min/km${zTxt}.`];
+  if (above) say.push(`${above.c.name} lead by ${(above.v - city.index).toFixed(2)} min/km.`);
+  if (below) say.push(`${below.c.name} trail by ${(city.index - below.v).toFixed(2)}.`);
   say.push(`Form: ${f.join("") || "n/a"} (${ITPL.formPts(f)} pts from the last ${f.length}).`);
-  if (peak) say.push(`Peak kick-off is ${peak}; the calmest spell is ${calm}.`);
+  if (peak) say.push(`Peak gridlock hits at ${peak}; the calmest spell is ${calm}.`);
   $("cReport").textContent = say.join(" ");
 
   // Next fixtures
@@ -103,7 +103,7 @@ function renderTactics(city) {
   const spd = city.legs.map(l => l.duration_min / l.distance_km), hard = spd.indexOf(Math.max(...spd)), easy = spd.indexOf(Math.min(...spd));
   $("cLegs").innerHTML = city.legs.map((l, i) => {
     const mk = (l.duration_min / l.distance_km);
-    return `<div class="leg-row"><div><div class="leg-pair">${l.pair}${i === hard ? ` <span class="tag-r">hardest</span>` : i === easy ? ` <span class="tag-g">smoothest</span>` : ""}</div><div class="leg-route">${l.from} → ${l.to}</div></div>
+    return `<div class="leg-row"><div><div class="leg-pair">${l.pair}${i === hard ? ` <span class="tag-r">top scorer</span>` : i === easy ? ` <span class="tag-g">benchwarmer</span>` : ""}</div><div class="leg-route">${l.from} → ${l.to}</div></div>
       <div class="leg-nums" style="color:${COL[ITPL.level(mk).key]}">${mk.toFixed(2)} min/km<div class="kmh">${l.distance_km.toFixed(1)} km · ${l.duration_min} min · ≈${Math.round(l.distance_km / (l.duration_min / 60))} km/h</div></div></div>`;
   }).join("");
 }
@@ -112,7 +112,7 @@ function renderTactics(city) {
 let calcBound = false, calcArgs = [];
 function renderCommute(city, live, hv, wkAvg) {
   calcArgs = [city, live, hv, wkAvg];
-  const km = +($("calcKm").value || 12), idx = wkAvg != null ? wkAvg : city.index, calmest = live[0];
+  const km = +($("calcKm").value || 12), idx = wkAvg != null ? wkAvg : city.index, calmest = live[live.length - 1];
   const one = v => Math.round(v * km);
   const yrH = idx * km * 2 * 250 / 60, extra = Math.max(0, (idx - calmest.v) * km * 2 * 250 / 60);
   $("calcKmVal").textContent = km + " km";
@@ -123,6 +123,6 @@ function renderCommute(city, live, hv, wkAvg) {
       <div><small>${hv ? "Peak window" : "Right now ×"}</small><b>${one(hv ? Math.max(...hv) : city.index)} min</b></div>
     </div>
     <p class="calc-line">Each way. A daily round trip (250 working days) costs you <b>${Math.round(yrH)} hours a year</b> in ${city.name} traffic — about <b>${(yrH / 24).toFixed(1)} full days</b> of your life.</p>
-    ${extra >= 1 && calmest.c.id !== city.id ? `<p class="calc-line">The same commute in ${calmest.c.name} (league leaders) would give you <b>${Math.round(extra)} hours</b> back — that's ${(extra / 8).toFixed(0)} working days.</p>` : ""}`;
+    ${extra >= 1 && calmest.c.id !== city.id ? `<p class="calc-line">The same commute in ${calmest.c.name} (the league's smoothest) would give you <b>${Math.round(extra)} hours</b> back — that's ${(extra / 8).toFixed(0)} working days.</p>` : ""}`;
   if (!calcBound) { calcBound = true; $("calcKm").addEventListener("input", () => renderCommute(...calcArgs)); }
 }

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Indian Traffic Premier League (ITPL)</title>
-<meta name="description" content="Live traffic league table for India's biggest cities: promotion and relegation zones, form guides and city-vs-city derbies, measured in minutes per kilometre. Updated hourly.">
+<meta name="description" content="Live traffic league table for India's biggest cities, where the most gridlocked city wins: champions and relegation zones, form guides and city-vs-city derbies, in minutes per kilometre. Updated hourly.">
 <link rel="canonical" href="https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/">
 
 <!-- Open Graph (WhatsApp, Slack, Facebook, LinkedIn previews) -->
@@ -43,7 +43,7 @@
         </div>
         <span class="mw">Matchday · Live</span>
         <h1 class="headline">How much older will<br>you be in <em>1&nbsp;km</em>?</h1>
-        <p class="hero-sub">The live league table of India's biggest cities. Fewest minutes per kilometre tops the table; gridlock goes down. Tap any club for its full match report.</p>
+        <p class="hero-sub">The live league table of India's biggest cities, where the most gridlocked city wins. The more minutes per kilometre, the higher you climb; cities that flow too freely get relegated. Tap any club for its full report.</p>
         <div class="live-ticker">
           <span class="live-dot" aria-hidden="true"></span>
           <span class="live-ticker-text">Refreshed hourly · last update <strong id="lastUpdated">—</strong></span>
@@ -59,17 +59,20 @@
         <span class="ranking-note" id="tableNote"></span>
       </div>
       <div class="tabs" role="tablist">
-        <button class="tab active" data-mode="live" role="tab">Live · this hour</button>
-        <button class="tab" data-mode="season" role="tab">Season · 7-day avg</button>
+        <button class="tab active" data-mode="live" role="tab">Live<small>this hour</small></button>
+        <button class="tab" data-mode="season" role="tab">Season<small>7-day avg</small></button>
+        <button class="tab" data-mode="month" role="tab">Hall of Fame<small>30-day avg</small></button>
       </div>
+      <p class="ranking-sub" id="modeNote" style="margin:0 0 10px;"></p>
+      <div class="tap-hint"><span class="finger" aria-hidden="true">👆</span><span><b>Tap any city</b> to open its club report: trends, best time to leave and what the traffic costs you.</span></div>
       <div class="lt">
         <div class="lt-head"><span>#</span><span></span><span></span><span>Club</span><span id="ltCol">Now</span><span style="text-align:right">Form</span></div>
         <div id="ltBody"><div class="chart-loading">Loading table…</div></div>
       </div>
       <div class="zone-key">
-        <span><i class="zk-up"></i>Promotion zone: free-flow leaders</span>
-        <span><i class="zk-dn"></i>Relegation zone: gridlock</span>
-        <span><i class="fb fb-W">W</i><i class="fb fb-D">D</i><i class="fb fb-L">L</i> last 5 days vs the day before (calmer / same / busier)</span>
+        <span><i class="zk-up"></i>Champions zone: peak gridlock</span>
+        <span><i class="zk-dn"></i>Relegation zone: suspiciously smooth</span>
+        <span><i class="fb fb-W">W</i><i class="fb fb-D">D</i><i class="fb fb-L">L</i> last 5 days vs the day before (busier / same / calmer)</span>
         <span>▲▼ live position vs 7-day table</span>
       </div>
     </section>
@@ -79,7 +82,7 @@
       <div class="lane-divider" aria-hidden="true"></div>
       <div class="page-eyebrow" style="margin-bottom:2px;">Match centre</div>
       <h2 class="ranking-title">Derby day</h2>
-      <p class="ranking-sub">Pick two cities and settle it: seven stats, a seven-day head-to-head, and the daily rhythm of both.</p>
+      <p class="ranking-sub">Pick two cities and settle it. The more gridlocked city wins each stat: seven stats, a seven-day head-to-head and the daily rhythm of both.</p>
       <div class="dsel"><select id="dA" aria-label="Home city"></select><em>v</em><select id="dB" aria-label="Away city"></select></div>
       <div class="chips" id="derbyChips"></div>
       <div class="derby-card" id="derbyOut"><div class="chart-loading">Loading fixtures…</div></div>
@@ -92,7 +95,7 @@
         <div><div class="page-eyebrow" style="margin-bottom:2px;">Past 7 days</div><h2 class="ranking-title">Kick-off times</h2></div>
         <span class="ranking-note" id="heatmapNote"></span>
       </div>
-      <p class="ranking-sub">Average min/km by time window. Green flows, red crawls; the white outline marks each city's worst window. Tap a city for its full report.</p>
+      <p class="ranking-sub">Each column is a time window (see the day-part headers), and each number is the average minutes per km in that window. Green flows, red crawls; the white outline marks a city's worst window. <b style="color:var(--green)">Tap a city for its report ›</b></p>
       <div class="heatmap-wrap" id="heatmapView"><div class="chart-loading">Loading heatmap…</div></div>
       <div class="lane-divider" aria-hidden="true"></div>
     </section>
@@ -166,9 +169,9 @@
 
     <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:16px;margin:26px 0 4px;">How the league works</h3>
     <div class="method-body" style="margin-top:6px;">
-      <p><strong>Table:</strong> cities are ranked by minutes per kilometre, lowest first. The top 20% sit in the promotion zone, the bottom 30% in the relegation zone. The Season tab ranks by the 7-day average.</p>
-      <p><strong>Form guide:</strong> each of the last five days is compared with the day before, using that day's latest reading. W = index fell by more than 3% (calmer), L = rose by more than 3% (busier), D = within 3%. Win = 3 pts, draw = 1.</p>
-      <p><strong>Derby:</strong> whichever city has the lower index wins each stat; the scoreline is stats won. Head-to-head compares the last seven daily readings.</p>
+      <p><strong>Table:</strong> cities are ranked by minutes per kilometre, highest first, because in this league the most gridlocked city wins. The top 20% sit in the champions zone; the bottom 30% are relegated for being suspiciously smooth. <em>Live</em> uses this hour's reading, <em>Season</em> the 7-day average and <em>Hall of Fame</em> the 30-day average.</p>
+      <p><strong>Form guide:</strong> each of the last five days is compared with the day before, using that day's latest reading. W = index rose by more than 3% (busier: gridlock gains), L = fell by more than 3% (calmer), D = within 3%. Win = 3 pts, draw = 1.</p>
+      <p><strong>Derby:</strong> whichever city is more congested wins each stat (except top corridor speed, where the slower city wins); the scoreline is stats won. Head-to-head compares the last seven daily readings, and the busier day wins.</p>
     </div>
 
     <div class="caveat-box">
