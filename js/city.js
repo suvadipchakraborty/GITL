@@ -37,6 +37,12 @@ const COL = ITPL.COL;
   $("chart24").innerHTML = ITPL.chart([{ vals:h24.pts.map(p => p.index), color:"#00ff85" }], h24.pts.map(p => ITPL.hourName(p.t)));
   $("chart7").innerHTML = ITPL.chart([{ vals:h7.pts.map(p => p.index), color:"#04f5ff" }], h7.pts.map(p => ITPL.dayName(p.t)));
 
+  // Last 30 days (non-blocking; sits on a fixed 30-day axis and fills in as history grows)
+  ITPL.hist30(city).then(h30 => {
+    $("t30Note").textContent = !h30.live ? "Demo pattern" : h30.days >= 27 ? "Live from sheet" : `Live · ${h30.days} of 30 days so far`;
+    $("chart30").innerHTML = ITPL.chart([{ vals:h30.pts.map(p => p.index), color:"#ff4d9d" }], h30.pts.map(p => ITPL.dateName(p.t)), 30);
+  }).catch(() => { $("chart30").innerHTML = `<div class="chart-loading">30-day trend unavailable right now.</div>`; });
+
   const f = ITPL.form(h7.pts);
   $("cForm").innerHTML = ITPL.badges(f) + `<span class="cl-pts">${ITPL.formPts(f)} pts</span>`;
 

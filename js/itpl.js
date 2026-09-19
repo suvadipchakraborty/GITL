@@ -32,6 +32,7 @@ const ITPL = (() => {
   const r2 = n => Math.round(n * 100) / 100;
   const ord = n => { const s = ["th","st","nd","rd"], v = n % 100; return n + (s[(v - 20) % 10] || s[v] || s[0]); };
   const abbr = c => ABBR[c.id] || c.name.slice(0, 3).toUpperCase();
+  const dateName = t => new Date(t).toLocaleDateString("en-IN", { day:"numeric", month:"short" });
   const dayName = t => new Date(t).toLocaleDateString("en-IN", { weekday:"short" });
   const hourName = t => new Date(t).toLocaleTimeString("en-IN", { hour:"numeric", hour12:true }).replace(" ", "").toLowerCase();
   function noise(s) { let h = 0; for (let i = 0; i < s.length; i++) { h = (h << 5) - h + s.charCodeAt(i); h |= 0; } return () => { h = (h * 1103515245 + 12345) & 0x7fffffff; return (h % 1000) / 1000; }; }
@@ -89,6 +90,15 @@ const ITPL = (() => {
     return { pts, live:false };
   }
 
+  /* 30-day history for one city. Uses range=30d if the backend really returns 8+ days; otherwise falls back to the 7-day daily points and reports how many days exist. */
+  async function hist30(city) {
+    const j = await api(`history=${encodeURIComponent(city.id)}&range=30d`, 30 * 60 * 1000);
+    const days = a => { const t = (a || []).map(p => new Date(p.t).getTime()).filter(x => !isNaN(x)); return t.length ? Math.round((Math.max(...t) - Math.min(...t)) / 864e5) + 1 : 0; };
+    if (j && j.points && days(j.points) >= 9) return { pts: j.points, live: true, days: days(j.points) };
+    const h = await hist(city, "7d");
+    return { pts: h.pts, live: h.live, days: days(h.pts) };
+  }
+
   /* Month view: tries range=30d; if the backend only keeps ~8 days (Code.gs default) it uses the 7-day daily points and reports how many days it really has. */
   async function month(raw) {
     const m = {}; let days = 0, live = true;
@@ -126,20 +136,21 @@ const ITPL = (() => {
   const crest = c => `<span class="crest" style="--c:${COL[level(c.index).key]}">${abbr(c)}</span>`;
 
   /* ---- charts (inline SVG, fixed viewBox so they scale to any phone width) ---- */
-  function chart(series, xl) {
-    const W = 300, H = 130, L = 26, R = 8, T = 12, B = 18, all = series.flatMap(s => s.vals), mn = Math.min(...all), mx = Math.max(...all), rg = (mx - mn) || 1, n = xl.length;
-    const y = v => T + (1 - (v - mn) / rg) * (H - T - B), x = i => L + (n > 1 ? i / (n - 1) : 0) * (W - L - R);
+  function chart(series, xl, total) {
+    const W = 300, H = 130, L = 26, R = 8, T = 12, B = 18, all = series.flatMap(s => s.vals), mn = Math.min(...all), mx = Math.max(...all), rg = (mx - mn) || 1, n = xl.length, N = Math.max(total || n, n), off = N - n;
+    const y = v => T + (1 - (v - mn) / rg) * (H - T - B), x = i => L + (N > 1 ? (i + off) / (N - 1) : 0) * (W - L - R);
     const grid = [.25, .5, .75].map(f => `<line class="gl" x1="${L}" x2="${W - R}" y1="${T + f * (H - T - B)}" y2="${T + f * (H - T - B)}"/>`).join("");
     const body = series.map(s => {
       const p = s.vals.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-      return (series.length === 1 ? `<polygon points="${L},${H - B} ${p} ${x(n - 1)},${H - B}" fill="${s.color}" opacity=".16"/>` : "") +
+      return (series.length === 1 ? `<polygon points="${x(0)},${H - B} ${p} ${x(n - 1)},${H - B}" fill="${s.color}" opacity=".16"/>` : "") +
         `<polyline points="${p}" fill="none" stroke="${s.color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>` +
         s.vals.map((v, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.4" fill="#2b0030" stroke="${s.color}" stroke-width="1.5"><title>${xl[i]}: ${v.toFixed(2)} min/km</title></circle>`).join("");
     }).join("");
-    const idx = n > 8 ? [0, Math.floor((n - 1) / 2), n - 1] : xl.map((_, i) => i);
+    const idx = off > 0 ? [n - 1] : n > 8 ? [0, Math.floor((n - 1) / 2), n - 1] : xl.map((_, i) => i);
+    const pad = off > 0 ? `<rect x="${L}" y="${T}" width="${(x(0) - L).toFixed(1)}" height="${H - T - B}" fill="#fff" opacity=".05"/><text class="al" x="${((L + x(0)) / 2).toFixed(1)}" y="${(T + (H - T - B) / 2 + 3).toFixed(1)}" text-anchor="middle">history builds daily</text>` : "";
     const lab = idx.map(i => `<text class="al" x="${x(i)}" y="${H - 4}" text-anchor="${i === 0 ? "start" : i === n - 1 ? "end" : "middle"}">${xl[i]}</text>`).join("");
-    return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Traffic index chart">${grid}<text class="al" x="${L - 3}" y="${y(mx) + 3}" text-anchor="end">${mx.toFixed(1)}</text><text class="al" x="${L - 3}" y="${y(mn) + 3}" text-anchor="end">${mn.toFixed(1)}</text>${body}${lab}</svg>`;
+    return `<svg class="chart-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Traffic index chart">${grid}${pad}${off > 0 ? `<text class="al" x="${L}" y="${H - 4}" text-anchor="start">${N} days ago</text>` : ""}<text class="al" x="${L - 3}" y="${y(mx) + 3}" text-anchor="end">${mx.toFixed(1)}</text><text class="al" x="${L - 3}" y="${y(mn) + 3}" text-anchor="end">${mn.toFixed(1)}</text>${body}${lab}</svg>`;
   }
 
-  return { API_URL, BASE, BUCKETS, SHORT, WIN, RANGE, AMPM, PARTS, month, COL, DERBIES, level, r2, ord, abbr, dayName, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
+  return { API_URL, BASE, BUCKETS, SHORT, WIN, RANGE, AMPM, PARTS, month, COL, DERBIES, level, r2, ord, abbr, dayName, dateName, hist30, hourName, snapshot, weekly, heat, hist, pool, table, zones, zoneOf, ZONE_LABEL, form, formPts, badges, crest, chart };
 })();

@@ -325,7 +325,7 @@ rather than waiting for Google to discover them organically.
 - **Derby day:** the **more congested city wins** each stat (exception: "fastest corridor", where the slower one wins), with a 🏆 for the winner. Head-to-head over the last 7 days: the busier day wins. Presets live in `ITPL.DERBIES`; `index.html?derby=mumbai,pune` deep-links.
 - **Kick-off times heatmap:** stacked rows (no sideways scroll). Headers now show day-parts (🌅 Morning 6–10 AM, ☀️ Midday 10 AM–4 PM, 🌆 Evening 4–8 PM, 🌙 Night 8 PM–12) plus each window's range with AM/PM, repeated at the bottom. Window names are defined once in `js/itpl.js` (`WIN`, `RANGE`, `AMPM`, `PARTS`).
 
-**City pages (`city/<slug>/`)**: live index, league position and form, 7-day stat tiles, 24h and 7-day trends, daily-rhythm bars, a tactics-board view of the four corridors (slowest = "top scorer", smoothest = "benchwarmer"), a commute-cost calculator (compared with the league's smoothest city), an auto-written match report and next-fixture links into the derby view.
+**City pages (`city/<slug>/`)**: live index, league position and form, 7-day stat tiles, 24h, 7-day and 30-day trend charts, daily-rhythm bars, a tactics-board view of the four corridors (slowest = "top scorer", smoothest = "benchwarmer"), a commute-cost calculator (compared with the league's smoothest city), an auto-written match report and next-fixture links into the derby view.
 
 **Code layout:** `js/itpl.js` is the shared library (API URL, bands, caching, table/form maths, charts) used by `app.js` and `city.js`. The Apps Script API URL lives only there. `Code.gs` is unchanged.
 
@@ -333,13 +333,13 @@ rather than waiting for Google to discover them organically.
 
 ## 10. Hall of Fame (30-day) needs a small backend change
 
-The Month view is built and works today, but **`Code.gs` prunes `IndexHistory` to about 8 days and only serves `range=24h` / `7d`**, so there is no real 30-day data to read yet. Until then the Hall of Fame tab averages the daily readings the sheet does have and says so under the tabs ("The sheet only holds N days of readings so far…").
+The Month view and the city pages' "Last 30 days" chart are built and work today, but **`Code.gs` prunes `IndexHistory` to about 8 days and only serves `range=24h` / `7d`**, so there is no real 30-day data to read yet. Until then the city chart draws the days that exist at the right edge of a fixed 30-day axis ("history builds daily", note reads "N of 30 days so far"), and the Hall of Fame tab averages the daily readings the sheet does have and says so under the tabs ("The sheet only holds N days of readings so far…").
 
 When you're ready (this is the only backend change needed):
 1. In the history pruning step, raise the retention cutoff from ~8 days to ~31 days (about 19 runs × 10 cities × 31 days ≈ 5,900 rows, well within Sheets limits).
 2. In the `?history=<id>&range=` handler, accept `30d` and return one point per day for 30 days, same shape as `7d`: `{ city, range, points: [{t, index}, ...] }`.
 
-The frontend requests `range=30d` per city (only when the Hall of Fame tab is opened, 4 at a time, cached 30 minutes). It only trusts the response if the points span 8+ days, so it upgrades itself automatically once the backend supports it.
+The frontend requests `range=30d` per city (when the Hall of Fame tab is opened, and for the "Last 30 days" chart on every city page, 4 at a time, cached 30 minutes). It only trusts the response if the points span 8+ days, so it upgrades itself automatically once the backend supports it.
 
 **Quota note:** the form guide needs one 7-day history call per city, also run 4 at a time and cached for 30 minutes (snapshot 5 minutes).
 
