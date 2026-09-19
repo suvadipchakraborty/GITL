@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Indian Traffic Premier League (ITPL)</title>
-<meta name="description" content="Live traffic congestion league table for India's biggest cities, measured in minutes per kilometre across each city's eight border points. Updated every hour.">
+<meta name="description" content="Live traffic league table for India's biggest cities: promotion and relegation zones, form guides and city-vs-city derbies, measured in minutes per kilometre. Updated hourly.">
 <link rel="canonical" href="https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/">
 
 <!-- Open Graph (WhatsApp, Slack, Facebook, LinkedIn previews) -->
@@ -31,95 +31,71 @@
 
 <div class="wrap">
 
-  <!-- ============ HOME VIEW (hero + ranking + city grid, all Index-tab only) ============ -->
+  <!-- ============ HOME VIEW ============ -->
   <main id="view-home" class="view active">
 
-    <!-- HERO / HEADER -->
     <header class="hero">
       <div class="hero-inner">
         <div class="brand-row">
           <div class="brand-mark">ITPL</div>
           <div class="brand-name">Indian Traffic Premier League</div>
-          <div class="speed-sign" aria-hidden="true">
-            <span class="speed-sign-num">1</span>
-            <span class="speed-sign-unit">KM</span>
-          </div>
+          <div class="speed-sign" aria-hidden="true"><span class="speed-sign-num">1</span><span class="speed-sign-unit">KM</span></div>
         </div>
+        <span class="mw">Matchday · Live</span>
         <h1 class="headline">How much older will<br>you be in <em>1&nbsp;km</em>?</h1>
-        <p class="hero-sub">A live congestion league table for India's biggest cities — because measuring urban mobility in distance is wildly optimistic. We track the only metric that matters: minutes of your life lost per kilometre travelled.</p>
-
+        <p class="hero-sub">The live league table of India's biggest cities. Fewest minutes per kilometre tops the table; gridlock goes down. Tap any club for its full match report.</p>
         <div class="live-ticker">
           <span class="live-dot" aria-hidden="true"></span>
           <span class="live-ticker-text">Refreshed hourly · last update <strong id="lastUpdated">—</strong></span>
-          <div class="national-index">
-            <span>National avg</span>
-            <span id="nationalIndex">—</span>
-          </div>
+          <div class="national-index"><span>League avg</span><span id="nationalIndex">—</span></div>
         </div>
       </div>
     </header>
 
-    <!-- CITY RANKING (all cities, unfiltered) -->
-    <section class="ranking-section">
-      <div class="lane-divider" aria-hidden="true"></div>
+    <!-- LEAGUE TABLE -->
+    <section class="ranking-section" id="league">
       <div class="ranking-header">
-        <div>
-          <div class="page-eyebrow" style="margin-bottom:2px;">Right now</div>
-          <h2 class="ranking-title">Congestion ranking</h2>
-        </div>
-        <span class="ranking-note" id="rankingNote"></span>
+        <div><div class="page-eyebrow" style="margin-bottom:2px;">Standings</div><h2 class="ranking-title">The league table</h2></div>
+        <span class="ranking-note" id="tableNote"></span>
       </div>
-      <p class="ranking-sub">Every tracked city, most to least congested, as of the latest hourly refresh.</p>
-      <div class="chart-wrap ranking-wrap" id="rankingChart"><div class="chart-loading">Loading ranking…</div></div>
+      <div class="tabs" role="tablist">
+        <button class="tab active" data-mode="live" role="tab">Live · this hour</button>
+        <button class="tab" data-mode="season" role="tab">Season · 7-day avg</button>
+      </div>
+      <div class="lt">
+        <div class="lt-head"><span>#</span><span></span><span></span><span>Club</span><span id="ltCol">Now</span><span style="text-align:right">Form</span></div>
+        <div id="ltBody"><div class="chart-loading">Loading table…</div></div>
+      </div>
+      <div class="zone-key">
+        <span><i class="zk-up"></i>Promotion zone: free-flow leaders</span>
+        <span><i class="zk-dn"></i>Relegation zone: gridlock</span>
+        <span><i class="fb fb-W">W</i><i class="fb fb-D">D</i><i class="fb fb-L">L</i> last 5 days vs the day before (calmer / same / busier)</span>
+        <span>▲▼ live position vs 7-day table</span>
+      </div>
     </section>
 
-    <!-- WEEKLY RANKING (avg index over the last 7 days) -->
-    <section class="ranking-section">
+    <!-- DERBY -->
+    <section class="ranking-section" id="derby">
       <div class="lane-divider" aria-hidden="true"></div>
-      <div class="ranking-header">
-        <div>
-          <div class="page-eyebrow" style="margin-bottom:2px;">Past 7 days</div>
-          <h2 class="ranking-title">Weekly league table</h2>
-        </div>
-        <span class="ranking-note" id="weeklyRankingNote"></span>
-      </div>
-      <p class="ranking-sub">Every tracked city, ranked by its average index across the last 7 days — the bigger picture behind this hour's snapshot.</p>
-      <div class="chart-wrap ranking-wrap" id="weeklyRankingChart"><div class="chart-loading">Loading weekly ranking…</div></div>
+      <div class="page-eyebrow" style="margin-bottom:2px;">Match centre</div>
+      <h2 class="ranking-title">Derby day</h2>
+      <p class="ranking-sub">Pick two cities and settle it: seven stats, a seven-day head-to-head, and the daily rhythm of both.</p>
+      <div class="dsel"><select id="dA" aria-label="Home city"></select><em>v</em><select id="dB" aria-label="Away city"></select></div>
+      <div class="chips" id="derbyChips"></div>
+      <div class="derby-card" id="derbyOut"><div class="chart-loading">Loading fixtures…</div></div>
     </section>
 
-    <!-- TIME-OF-DAY HEATMAP -->
+    <!-- HEATMAP (stacked rows: no sideways scrolling) -->
     <section class="ranking-section">
       <div class="lane-divider" aria-hidden="true"></div>
       <div class="ranking-header">
-        <div>
-          <div class="page-eyebrow" style="margin-bottom:2px;">Past 7 days</div>
-          <h2 class="ranking-title">Time-of-day heatmap</h2>
-        </div>
+        <div><div class="page-eyebrow" style="margin-bottom:2px;">Past 7 days</div><h2 class="ranking-title">Kick-off times</h2></div>
         <span class="ranking-note" id="heatmapNote"></span>
       </div>
-      <p class="ranking-sub">Average index by 2–4 hour window, city by city, over the last full week. Darker red = worse. Swipe sideways to see all time slots.</p>
+      <p class="ranking-sub">Average min/km by time window. Green flows, red crawls; the white outline marks each city's worst window. Tap a city for its full report.</p>
       <div class="heatmap-wrap" id="heatmapView"><div class="chart-loading">Loading heatmap…</div></div>
       <div class="lane-divider" aria-hidden="true"></div>
     </section>
-
-    <div class="controls">
-      <input type="search" id="citySearch" class="search-input" placeholder="Search a city (e.g. Pune, Kochi)" aria-label="Search city">
-    </div>
-
-    <div class="sort-row">
-      <span id="cityCount">— cities</span>
-      <label for="sortSelect" class="sr-only">Sort cities</label>
-      <select id="sortSelect">
-        <option value="index-desc">Most congested first</option>
-        <option value="index-asc">Free-flowing first</option>
-        <option value="name-asc">City name (A–Z)</option>
-      </select>
-    </div>
-
-    <p class="grid-hint">Click on a card to view traffic trends</p>
-
-    <div id="cityGrid" class="city-grid" aria-live="polite"></div>
-    <div id="emptyState" class="empty-state" style="display:none;">No cities match your search.</div>
 
   </main>
 
@@ -188,6 +164,13 @@
       <div class="legend-item"><span class="legend-swatch" style="background:var(--severe-red)"></span>Severe — above 6 min/km</div>
     </div>
 
+    <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:16px;margin:26px 0 4px;">How the league works</h3>
+    <div class="method-body" style="margin-top:6px;">
+      <p><strong>Table:</strong> cities are ranked by minutes per kilometre, lowest first. The top 20% sit in the promotion zone, the bottom 30% in the relegation zone. The Season tab ranks by the 7-day average.</p>
+      <p><strong>Form guide:</strong> each of the last five days is compared with the day before, using that day's latest reading. W = index fell by more than 3% (calmer), L = rose by more than 3% (busier), D = within 3%. Win = 3 pts, draw = 1.</p>
+      <p><strong>Derby:</strong> whichever city has the lower index wins each stat; the scoreline is stats won. Head-to-head compares the last seven daily readings.</p>
+    </div>
+
     <div class="caveat-box">
       <strong>Honest limitations.</strong> Border points approximate a city's outer limits and are periodically reviewed as cities grow — they are reference markers, not administrative boundaries. Because the index averages just four corridors, it describes overall cross-city conditions, not any single street or your specific route. Treat it as a city-level pulse check, not a substitute for live navigation before you drive.
     </div>
@@ -224,47 +207,6 @@
 
 </div>
 
-<!-- ============ CITY DETAIL SHEET ============ -->
-<div id="sheetBackdrop" class="sheet-backdrop" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
-  <div class="sheet" style="position:relative;">
-    <button class="sheet-close" id="sheetClose" aria-label="Close">✕</button>
-    <div class="sheet-handle"></div>
-    <div class="sheet-state" id="sheetState"></div>
-    <h2 class="sheet-title" id="sheetTitle"></h2>
-
-    <div class="sheet-index-big">
-      <span class="val" id="sheetIndexVal"></span>
-      <span class="unit">min / km · <span id="sheetLevel"></span></span>
-    </div>
-    <div class="level-tag" id="sheetLevelTag" style="display:inline-block;"></div>
-
-    <div class="compass" id="compass">
-      <div class="center-mark"></div>
-    </div>
-
-    <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:14px;margin:6px 0 2px;">Corridor breakdown</h3>
-    <div class="leg-list" id="legList"></div>
-
-    <div class="trend-section">
-      <div class="trend-title-row">
-        <h3>Last 24 hours</h3>
-        <span class="trend-note" id="trend24Note"></span>
-      </div>
-      <div class="chart-wrap" id="chart24h"><div class="chart-loading">Loading trend…</div></div>
-    </div>
-
-    <div class="trend-section">
-      <div class="trend-title-row">
-        <h3>Last 7 days <span class="trend-sub">(latest hour each day)</span></h3>
-        <span class="trend-note" id="trend7dNote"></span>
-      </div>
-      <div class="chart-wrap" id="chart7d"><div class="chart-loading">Loading trend…</div></div>
-    </div>
-
-    <div class="sheet-note">Distances and times are pulled with a live departure time, so they reflect current traffic rather than the free-flow baseline. Figures update every hour.</div>
-  </div>
-</div>
-
 <!-- ============ BOTTOM NAV ============ -->
 <nav class="bottom-nav">
   <button data-view="home" class="active">
@@ -294,6 +236,7 @@
   </footer>
 </div>
 
+<script src="js/itpl.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

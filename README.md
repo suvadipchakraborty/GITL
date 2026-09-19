@@ -7,8 +7,10 @@ driving times pulled via Google Apps Script.
 ```
 traffic-index/
 ├── index.html          # single-page app: Index / Methodology / Contact
-├── css/style.css        # "highway milestone" design system
-├── js/app.js             # rendering, filters, sort, city detail, mailto
+├── css/style.css        # "Matchday Night" Premier League theme
+├── js/itpl.js            # shared library: API URL, league maths, charts
+├── js/app.js             # home: league table, form, derby, heatmap
+├── js/city.js            # city pages: trends, rhythm, calculator, report
 ├── data/sample-cities.json  # bundled mock data (14 cities) — used until
 │                             #   you connect the live backend
 ├── backend/Code.gs       # Google Apps Script backend (the free data engine)
@@ -312,12 +314,30 @@ city pages. Submit `sitemap.xml` to Google Search Console once your
 domain is live — this is usually the fastest way to get new pages crawled
 rather than waiting for Google to discover them organically.
 
-## 9. Ideas for a v3 (not built yet, scoped for later)
+## 9. Matchday redesign (v3)
 
-- **City comparison** — pick 2–3 cities side by side.
-- **Push/email alerts** — notify when a city crosses into "Severe."
-- **More cities** — the Cities sheet is fully data-driven, so scaling
-  past the starter set is just adding rows (mind the quota note above).
+**Theme:** deep-purple floodlit "Matchday Night" look with neon green, cyan and magenta accents (`css/style.css`). Old colour token names are kept as aliases.
+
+**Home page (`index.html` + `js/app.js`)**
+- **League table**: cities ranked by min/km, lowest first. Top 20% = promotion zone (green edge), bottom 30% = relegation zone (pink edge). Tabs switch between *Live* and *Season* (7-day average). ▲▼ shows live position vs the 7-day table.
+- **Form guide**: last 5 days as W/D/L badges. Each day's latest reading is compared with the day before: W = index fell >3%, L = rose >3%, D = within 3%. W = 3 pts, D = 1.
+- **Derby day**: any two cities head to head: seven stats, a scoreline, a 7-day head-to-head strip and an overlaid daily-rhythm chart. Preset rivalries live in `ITPL.DERBIES` (`js/itpl.js`). `index.html?derby=mumbai,pune` deep-links to one.
+- **Heatmap** is now stacked rows (city name on top, 8 time-window cells beneath), so it never scrolls sideways.
+- The old city-card grid, search box and bottom-sheet were removed: every table row, heatmap row and derby crest now opens the city page, which has everything the sheet had and more. `?open=<slug>` still works (redirects to the city page).
+
+**City pages (`city/<slug>/`)**: live index with league position and form, extra stat tiles (7-day average, calmest/busiest day, consistency), 24h and 7-day trend charts, "best time to leave" daily-rhythm bars, a tactics-board view of the four corridors (hardest/smoothest flagged), a commute-cost calculator (hours and days lost per year, vs the league leaders), an auto-written match report, and next-fixture links into the derby view.
+
+**Code layout:** `js/itpl.js` is now the single shared library (API URL, bands, caching, table/form maths, charts) used by both `app.js` and `city.js`. **The Apps Script API URL now lives only in `js/itpl.js`**, so update it in one place. `Code.gs` and the API contract are unchanged: everything new is derived from the existing snapshot, `history`, `weekly_ranking` and `heatmap` endpoints.
+
+**Quota note:** the form guide needs one 7-day history call per city. They run 4 at a time and are cached in the browser for 30 minutes (snapshot 5 minutes), so repeat visits cost the backend almost nothing.
+
+**Regenerate city pages** after editing the template: `python3 scripts/generate-city-pages.py`.
+
+## 10. Ideas for later
+
+- Push/email alerts when a city crosses into "Severe" or drops into the relegation zone.
+- Shareable derby result cards (needs a serverless image endpoint).
+- More cities: the Cities sheet is data-driven, and the league zones scale automatically.
 
 ---
 Created by Suva

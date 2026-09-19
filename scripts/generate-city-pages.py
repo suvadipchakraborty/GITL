@@ -69,54 +69,86 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <header class="hero" style="padding-bottom:14px;">
     <div class="hero-inner">
       <div class="brand-row">
-        <a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">
+        <a href="../../index.html">
           <div class="brand-mark">ITPL</div>
           <div class="brand-name">Indian Traffic Premier League</div>
         </a>
       </div>
-      <div class="page-eyebrow" style="margin-top:18px;">City report</div>
-      <h1 class="page-title" style="font-size:38px;">{city_name}</h1>
-      <p class="ranking-sub" style="margin-bottom:0;">{state}</p>
+      <span class="mw">Club report</span>
+      <h1 class="page-title" style="font-size:40px;margin-bottom:2px;">{city_name}</h1>
+      <p class="ranking-sub" style="margin:0;">{state} · {city_name} Traffic Index</p>
     </div>
   </header>
 
   <section class="ranking-section">
+    <div class="ranking-header"><div><div class="page-eyebrow" style="margin-bottom:2px;">Right now</div><h2 class="ranking-title">Live traffic index</h2></div></div>
+    <div class="chart-wrap ranking-wrap" id="cLive" style="margin-top:10px;"><div class="chart-loading">Loading live index…</div></div>
+    <div class="stats" id="cStats"></div>
+  </section>
+
+  <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
-    <div class="ranking-header">
-      <div>
-        <div class="page-eyebrow" style="margin-bottom:2px;">Right now</div>
-        <h2 class="ranking-title">Live traffic index</h2>
-      </div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Trends</div><h2 class="ranking-title">How {city_name} is playing</h2>
+    <div class="trend-title-row"><h3>Last 24 hours</h3><span class="trend-note" id="t24Note"></span></div>
+    <div class="chart-wrap" id="chart24"><div class="chart-loading">Loading trend…</div></div>
+    <div class="trend-title-row"><h3>Last 7 days <span class="trend-note">(latest hour each day)</span></h3><span class="trend-note" id="t7Note"></span></div>
+    <div class="chart-wrap" id="chart7"><div class="chart-loading">Loading trend…</div></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="ranking-header"><div><div class="page-eyebrow" style="margin-bottom:2px;">Daily rhythm</div><h2 class="ranking-title">Best time to leave</h2></div><span class="ranking-note" id="hmNote"></span></div>
+    <p class="ranking-sub">Average min/km in each time window over the last 7 days.</p>
+    <div class="chart-wrap" id="cRhythm"><div class="chart-loading">Loading rhythm…</div></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Tactics board</div><h2 class="ranking-title">The four corridors</h2>
+    <p class="ranking-sub">Every reading is four routes forced through the centre of {city_name}. Here is how each one is playing right now.</p>
+    <div class="chart-wrap" id="cPitch"></div>
+    <div class="leg-list" id="cLegs"></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Commute calculator</div><h2 class="ranking-title">What does it cost you?</h2>
+    <p class="ranking-sub">Drag to your one-way commute distance.</p>
+    <div class="calc">
+      <div class="calc-row"><span>Distance</span><input type="range" id="calcKm" min="2" max="40" value="12" aria-label="Commute distance in km"><b id="calcKmVal">12 km</b></div>
+      <div id="calcOut"></div>
     </div>
-    <div class="chart-wrap ranking-wrap" id="liveIndexBox">
-      <div class="chart-loading">Loading live index…</div>
-    </div>
-    <a href="../../index.html?open={slug}" class="btn-primary" style="text-decoration:none;display:inline-flex;margin-top:14px;">Open full interactive dashboard →</a>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:6px;">Match report</div>
+    <p class="report" id="cReport">Waiting for the live feed…</p>
+    <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:14px;margin:18px 0 8px;">Next fixtures</h3>
+    <div class="fixtures" id="cRivals"></div>
+    <a href="../../index.html" class="btn-primary">See the full league table →</a>
   </section>
 
   <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
     <div class="page-eyebrow" style="margin-bottom:6px;">About this reading</div>
     <p class="page-intro">{intro_paragraph}</p>
-
     <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:14px;margin:18px 0 8px;">The eight border points used for {city_name}</h3>
     <div class="leg-list">
 {borders_html}
     </div>
-
     <div class="caveat-box">
       This index measures minutes of travel time per kilometre across
       {city_name}'s four cross-city corridors, refreshed hourly using
       live, traffic-aware routing forced through the city centre —
-      not a fast bypass. <a href="../../index.html#methodology" style="color:var(--milestone-yellow);">Read the full methodology →</a>
+      not a fast bypass. <a href="../../index.html#methodology">Read the full methodology →</a>
     </div>
   </section>
 
   <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
-    <div class="page-eyebrow" style="margin-bottom:6px;">Other cities we track</div>
-    <p class="page-intro" style="margin-bottom:14px;">Compare {city_name} against every other city in the league.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
+    <div class="page-eyebrow" style="margin-bottom:6px;">Other clubs in the league</div>
+    <div class="pill-links">
 {other_cities_html}
     </div>
     <div class="lane-divider" aria-hidden="true" style="margin-top:20px;"></div>
@@ -125,22 +157,23 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 </div>
 
 <nav class="bottom-nav">
-  <a href="../../index.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span>
     Index
   </a>
-  <a href="../../index.html#methodology" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html#methodology">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
     Methodology
   </a>
-  <a href="../../index.html#contact" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html#contact">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
     Contact
   </a>
 </nav>
 
+<script>window.CITY_SLUG = "{slug}"; window.ITPL_BASE = "../../";</script>
+<script src="../../js/itpl.js"></script>
 <script src="../../js/city.js"></script>
-<script>window.CITY_SLUG = "{slug}";</script>
 </body>
 </html>
 """
@@ -180,15 +213,14 @@ def main():
         )
 
         other_cities_html = "\n".join(
-            f'  <a href="../{s}/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);'
-            f'border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">{c["name"]}</a>'
+            f'  <a href="../{s}/index.html">{c["name"]}</a>'
             for c, s in zip(cities, slugs) if s != slug
         )
 
         meta_desc = (
             f"Live traffic congestion index for {name}, updated hourly. "
-            f"See {name}'s current minutes-per-kilometre score, trend charts, "
-            f"and how it compares to other major Indian cities."
+            f"See {name}'s league position, form guide, 24-hour and 7-day trends, "
+            f"best time to leave and how it compares to other major Indian cities."
         )
         title = f"{name} Traffic Index — Live Congestion Data | ITPL"
         og_title = f"{name} Traffic Index — Indian Traffic Premier League"

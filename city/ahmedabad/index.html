@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ahmedabad Traffic Index — Live Congestion Data | ITPL</title>
-<meta name="description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's current minutes-per-kilometre score, trend charts, and how it compares to other major Indian cities.">
+<meta name="description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's league position, form guide, 24-hour and 7-day trends, best time to leave and how it compares to other major Indian cities.">
 <link rel="canonical" href="https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/city/ahmedabad/index.html">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Indian Traffic Premier League (ITPL)">
 <meta property="og:title" content="Ahmedabad Traffic Index — Indian Traffic Premier League">
-<meta property="og:description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's current minutes-per-kilometre score, trend charts, and how it compares to other major Indian cities.">
+<meta property="og:description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's league position, form guide, 24-hour and 7-day trends, best time to leave and how it compares to other major Indian cities.">
 <meta property="og:image" content="https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/assets/og/og-ahmedabad.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -18,7 +18,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Ahmedabad Traffic Index — Indian Traffic Premier League">
-<meta name="twitter:description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's current minutes-per-kilometre score, trend charts, and how it compares to other major Indian cities.">
+<meta name="twitter:description" content="Live traffic congestion index for Ahmedabad, updated hourly. See Ahmedabad's league position, form guide, 24-hour and 7-day trends, best time to leave and how it compares to other major Indian cities.">
 <meta name="twitter:image" content="https://indian-traffic-premier-league.suvadipchakraborty.workers.dev/assets/og/og-ahmedabad.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,36 +32,70 @@
   <header class="hero" style="padding-bottom:14px;">
     <div class="hero-inner">
       <div class="brand-row">
-        <a href="../../index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex:1;">
+        <a href="../../index.html">
           <div class="brand-mark">ITPL</div>
           <div class="brand-name">Indian Traffic Premier League</div>
         </a>
       </div>
-      <div class="page-eyebrow" style="margin-top:18px;">City report</div>
-      <h1 class="page-title" style="font-size:38px;">Ahmedabad</h1>
-      <p class="ranking-sub" style="margin-bottom:0;">Gujarat</p>
+      <span class="mw">Club report</span>
+      <h1 class="page-title" style="font-size:40px;margin-bottom:2px;">Ahmedabad</h1>
+      <p class="ranking-sub" style="margin:0;">Gujarat · Ahmedabad Traffic Index</p>
     </div>
   </header>
 
   <section class="ranking-section">
+    <div class="ranking-header"><div><div class="page-eyebrow" style="margin-bottom:2px;">Right now</div><h2 class="ranking-title">Live traffic index</h2></div></div>
+    <div class="chart-wrap ranking-wrap" id="cLive" style="margin-top:10px;"><div class="chart-loading">Loading live index…</div></div>
+    <div class="stats" id="cStats"></div>
+  </section>
+
+  <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
-    <div class="ranking-header">
-      <div>
-        <div class="page-eyebrow" style="margin-bottom:2px;">Right now</div>
-        <h2 class="ranking-title">Live traffic index</h2>
-      </div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Trends</div><h2 class="ranking-title">How Ahmedabad is playing</h2>
+    <div class="trend-title-row"><h3>Last 24 hours</h3><span class="trend-note" id="t24Note"></span></div>
+    <div class="chart-wrap" id="chart24"><div class="chart-loading">Loading trend…</div></div>
+    <div class="trend-title-row"><h3>Last 7 days <span class="trend-note">(latest hour each day)</span></h3><span class="trend-note" id="t7Note"></span></div>
+    <div class="chart-wrap" id="chart7"><div class="chart-loading">Loading trend…</div></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="ranking-header"><div><div class="page-eyebrow" style="margin-bottom:2px;">Daily rhythm</div><h2 class="ranking-title">Best time to leave</h2></div><span class="ranking-note" id="hmNote"></span></div>
+    <p class="ranking-sub">Average min/km in each time window over the last 7 days.</p>
+    <div class="chart-wrap" id="cRhythm"><div class="chart-loading">Loading rhythm…</div></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Tactics board</div><h2 class="ranking-title">The four corridors</h2>
+    <p class="ranking-sub">Every reading is four routes forced through the centre of Ahmedabad. Here is how each one is playing right now.</p>
+    <div class="chart-wrap" id="cPitch"></div>
+    <div class="leg-list" id="cLegs"></div>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:2px;">Commute calculator</div><h2 class="ranking-title">What does it cost you?</h2>
+    <p class="ranking-sub">Drag to your one-way commute distance.</p>
+    <div class="calc">
+      <div class="calc-row"><span>Distance</span><input type="range" id="calcKm" min="2" max="40" value="12" aria-label="Commute distance in km"><b id="calcKmVal">12 km</b></div>
+      <div id="calcOut"></div>
     </div>
-    <div class="chart-wrap ranking-wrap" id="liveIndexBox">
-      <div class="chart-loading">Loading live index…</div>
-    </div>
-    <a href="../../index.html?open=ahmedabad" class="btn-primary" style="text-decoration:none;display:inline-flex;margin-top:14px;">Open full interactive dashboard →</a>
+  </section>
+
+  <section class="ranking-section">
+    <div class="lane-divider" aria-hidden="true"></div>
+    <div class="page-eyebrow" style="margin-bottom:6px;">Match report</div>
+    <p class="report" id="cReport">Waiting for the live feed…</p>
+    <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:14px;margin:18px 0 8px;">Next fixtures</h3>
+    <div class="fixtures" id="cRivals"></div>
+    <a href="../../index.html" class="btn-primary">See the full league table →</a>
   </section>
 
   <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
     <div class="page-eyebrow" style="margin-bottom:6px;">About this reading</div>
     <p class="page-intro">Ahmedabad, Gujarat is one of the 10 cities tracked by the Indian Traffic Premier League. Every hour, we pull live, traffic-aware driving times across Ahmedabad's four busiest cross-city corridors — each one forced through the city centre rather than a ring road or bypass, so the number reflects what driving through Ahmedabad actually feels like right now, not the fastest possible detour around it.</p>
-
     <h3 style="font-family:var(--font-display);text-transform:uppercase;font-size:14px;margin:18px 0 8px;">The eight border points used for Ahmedabad</h3>
     <div class="leg-list">
       <div class="leg-row"><div class="leg-pair">North</div><div class="leg-nums">Chandkheda Circle</div></div>
@@ -73,29 +107,27 @@
       <div class="leg-row"><div class="leg-pair">South-East</div><div class="leg-nums">Vatva GIDC Junction</div></div>
       <div class="leg-row"><div class="leg-pair">South-West</div><div class="leg-nums">Sarkhej Circle</div></div>
     </div>
-
     <div class="caveat-box">
       This index measures minutes of travel time per kilometre across
       Ahmedabad's four cross-city corridors, refreshed hourly using
       live, traffic-aware routing forced through the city centre —
-      not a fast bypass. <a href="../../index.html#methodology" style="color:var(--milestone-yellow);">Read the full methodology →</a>
+      not a fast bypass. <a href="../../index.html#methodology">Read the full methodology →</a>
     </div>
   </section>
 
   <section class="ranking-section">
     <div class="lane-divider" aria-hidden="true"></div>
-    <div class="page-eyebrow" style="margin-bottom:6px;">Other cities we track</div>
-    <p class="page-intro" style="margin-bottom:14px;">Compare Ahmedabad against every other city in the league.</p>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
-  <a href="../new-delhi/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">New Delhi</a>
-  <a href="../mumbai/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Mumbai</a>
-  <a href="../bengaluru/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Bengaluru</a>
-  <a href="../chennai/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Chennai</a>
-  <a href="../kolkata/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Kolkata</a>
-  <a href="../hyderabad/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Hyderabad</a>
-  <a href="../pune/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Pune</a>
-  <a href="../jaipur/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Jaipur</a>
-  <a href="../lucknow/index.html" style="background:var(--asphalt-2);border:1px solid var(--lane-line);border-radius:20px;padding:8px 14px;font-size:12.5px;color:var(--chalk-dim);text-decoration:none;">Lucknow</a>
+    <div class="page-eyebrow" style="margin-bottom:6px;">Other clubs in the league</div>
+    <div class="pill-links">
+  <a href="../new-delhi/index.html">New Delhi</a>
+  <a href="../mumbai/index.html">Mumbai</a>
+  <a href="../bengaluru/index.html">Bengaluru</a>
+  <a href="../chennai/index.html">Chennai</a>
+  <a href="../kolkata/index.html">Kolkata</a>
+  <a href="../hyderabad/index.html">Hyderabad</a>
+  <a href="../pune/index.html">Pune</a>
+  <a href="../jaipur/index.html">Jaipur</a>
+  <a href="../lucknow/index.html">Lucknow</a>
     </div>
     <div class="lane-divider" aria-hidden="true" style="margin-top:20px;"></div>
   </section>
@@ -103,21 +135,22 @@
 </div>
 
 <nav class="bottom-nav">
-  <a href="../../index.html" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg></span>
     Index
   </a>
-  <a href="../../index.html#methodology" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html#methodology">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg></span>
     Methodology
   </a>
-  <a href="../../index.html#contact" style="text-decoration:none;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 8px;color:var(--muted);font-size:11px;">
+  <a href="../../index.html#contact">
     <span class="icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8a8f98" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
     Contact
   </a>
 </nav>
 
+<script>window.CITY_SLUG = "ahmedabad"; window.ITPL_BASE = "../../";</script>
+<script src="../../js/itpl.js"></script>
 <script src="../../js/city.js"></script>
-<script>window.CITY_SLUG = "ahmedabad";</script>
 </body>
 </html>
